@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "915509909329",
+    "project_id": "palette-app1",
+    "storage_bucket": "palette-app1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:915509909329:android:5224c60a67bbf404512570",
+        "android_client_info": {
+          "package_name": "com.example.project_pallete"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAp5dVW-yE3xLQDxitN9Jqxu5Jek4kUF_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
