@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:project_pallete/screen/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
 
-
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
 
-print("Firebase initialized successfully!");
-runApp(const MyApp());
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  print("Firebase initialized successfully!");
 
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://qmbjdidwrzozjfisqyac.supabase.co', // Your Supabase Project URL
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYmpkaWR3cnpvempmaXNxeWFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4MTg4MDAsImV4cCI6MjA0OTM5NDgwMH0.xntjOcrt_xmhqH9bzjgaLbsgtiMZ5BCIZ45pDnCzZEc',       // Your Supabase Public Anonymous Key
+  );
+  print("Supabase initialized successfully!");
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project_pallete/screen/login.dart';
 import 'home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -47,6 +48,15 @@ class _SignupScreenState extends State<SignupScreen> {
       });
     }
   }
+
+Future<bool> _checkIfUsernameExists(String username) async {
+  final querySnapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .where('username', isEqualTo: username)
+      .get();
+
+  return querySnapshot.docs.isNotEmpty;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -204,65 +214,66 @@ class _SignupScreenState extends State<SignupScreen> {
                         // Sign Up button
                         ElevatedButton(
                           onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              try {
-                                final userCredential = await FirebaseAuth
-                                    .instance
-                                    .createUserWithEmailAndPassword(
-                                  email: _emailController.text.trim(),
-                                  password: _passwordController.text.trim(),
-                                );
+  if (_formKey.currentState!.validate()) {
+   
+   
+    try {
+      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-                                final user = userCredential.user;
-                                if (user != null) {
-                                  await user.updateDisplayName(
-                                      _usernameController.text.trim());
-                                  await user.reload();
+      final user = userCredential.user;
+      if (user != null) {
+        // Update display name
+        await user.updateDisplayName(_usernameController.text.trim());
+        await user.reload();
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(
-                                            'Account created successfully for ${user.email}!')),
-                                  );
+        // Store additional user details in Firestore
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'username': _usernameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'birthday': _birthdayController.text.trim(),
+          'created_at': Timestamp.now(),
+        });
 
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => HomePage()),
-                                  );
-                                }
-                              } on FirebaseAuthException catch (e) {
-                                String message;
-                                switch (e.code) {
-                                  case 'weak-password':
-                                    message =
-                                        'The password provided is too weak.';
-                                    break;
-                                  case 'email-already-in-use':
-                                    message =
-                                        'The account already exists for that email.';
-                                    break;
-                                  case 'invalid-email':
-                                    message =
-                                        'The email address is not valid.';
-                                    break;
-                                  default:
-                                    message =
-                                        'An error occurred: ${e.message}';
-                                }
+        // Success feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Account created successfully for ${user.email}!')),
+        );
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(message)),
-                                );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'An unexpected error occurred: $e')),
-                                );
-                              }
-                            }
-                          },
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'weak-password':
+          message = 'The password provided is too weak.';
+          break;
+        case 'email-already-in-use':
+          message = 'The account already exists for that email.';
+          break;
+        case 'invalid-email':
+          message = 'The email address is not valid.';
+          break;
+        default:
+          message = 'An error occurred: ${e.message}';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An unexpected error occurred: $e')),
+      );
+    }
+  }
+},
+
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 const Color.fromARGB(255, 232, 114, 134),
